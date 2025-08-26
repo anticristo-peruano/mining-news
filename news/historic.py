@@ -17,8 +17,6 @@ class gdelt_archive:
 
         for filenames in tqdm(list(self.parse_date()),desc=str(year)):
             self.fetch_zipped_csv(LINK + filenames)
-        if self.code:
-            self.select_country()
     
     def parse_date(self):
         '''Rules:
@@ -65,18 +63,11 @@ class gdelt_archive:
                     columns = COLUMNS,
                     fill_value = None
                 )
+                if self.code:
+                    df = df[(df['ACTOR1COUNTRYCODE']==self.code) | (df['ACTOR2COUNTRYCODE']==self.code)]
                 df.to_csv(
                     self.export,
                     mode = 'a', 
                     header = not os.path.exists(self.export),
                     index = False
                 )
-
-    def select_country(self):
-        df = pd.read_csv(self.export)
-        df = df[(df['ACTOR1COUNTRYCODE']==self.code) | (df['ACTOR2COUNTRYCODE']==self.code)]
-        
-        if df.shape[0] != 0:
-            df.to_csv(self.export,index=False)
-        else:
-            print('Wrong code. No selection performed (df.shape[0] = 0).')

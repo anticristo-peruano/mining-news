@@ -1,4 +1,6 @@
 # Personal
+reports/*/
+*.xlsx
 *.csv
 *.ipynb
 
