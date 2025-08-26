@@ -15,7 +15,7 @@ class gdelt_archive:
         self.code = code
         os.makedirs(export_path,exist_ok=True)
 
-        for filenames in tqdm(list(self.parse_date())):
+        for filenames in tqdm(list(self.parse_date()),desc=str(year)):
             self.fetch_zipped_csv(LINK + filenames)
         if self.code:
             self.select_country()
@@ -55,16 +55,21 @@ class gdelt_archive:
             zip = zipfile.ZipFile(io.BytesIO(resp.content))
 
             with zip.open(zip.namelist()[0]) as f:
-                pd.read_csv(
+                df = pd.read_csv(
                     f, 
                     sep = '\t', 
                     header = None
-                ).to_csv(
+                )
+                df.columns = COLUMNS[:len(df.columns)]
+                df.reindex(
+                    columns = COLUMNS,
+                    fill_value = None
+                )
+                df.to_csv(
                     self.export,
                     mode = 'a', 
                     header = not os.path.exists(self.export),
-                    columns = COLUMNS,
-                    index=False
+                    index = False
                 )
 
     def select_country(self):
